@@ -10,5 +10,5 @@ void initDependencies() {
   getIt.registerLazySingleton(() => NavigationService());
   getIt.registerLazySingleton(() => DashboardCubit());
   getIt.registerFactory(() => AddExpenseCubit());
-  getIt.registerFactory(() => HomeCubit());
+  getIt.registerLazySingleton(() => HomeCubit());
 }

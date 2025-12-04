@@ -1,7 +1,9 @@
 import 'package:expense_tracker_app/core/database/database_helper.dart';
+import 'package:expense_tracker_app/core/di/di_service.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/model/category.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_expense_state.dart';
+import 'package:expense_tracker_app/feature/home/presentation/cubit/home_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddExpenseCubit extends Cubit<AddExpenseState> {
@@ -68,6 +70,7 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
       );
 
       await DatabaseHelper.instance.insertExpense(expense);
+      getIt<HomeCubit>().loadExpenses();
       emit(AddExpenseSuccess());
     } catch (e) {
       emit(AddExpenseError(e.toString()));

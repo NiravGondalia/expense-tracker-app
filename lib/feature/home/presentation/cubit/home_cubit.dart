@@ -6,22 +6,60 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit() : super(HomeLoading());
 
+  List<Expense> _expenses = [];
+  double _totalSpent = 0;
+
   Future<void> loadExpenses() async {
     emit(HomeLoading());
 
     try {
-      final List<Expense> expenses = await DatabaseHelper.instance.getAllExpenses();
-      final double totalSpent = expenses.fold<double>(
+      _expenses = await DatabaseHelper.instance.getAllExpenses();
+      _totalSpent = _expenses.fold<double>(
         0,
         (sum, expense) => sum + expense.amount,
       );
 
-      emit(HomeLoaded(
-        expenses: expenses,
-        totalSpent: totalSpent,
-      ));
+      emit(
+        HomeLoaded(
+          expenses: _expenses,
+          filteredExpenses: _expenses,
+          totalSpent: _totalSpent,
+        ),
+      );
     } catch (e) {
       emit(HomeError(e.toString()));
     }
+  }
+
+  void searchExpenses(String query) {
+    final String searchQuery = query.toLowerCase().trim();
+
+    if (searchQuery.isEmpty) {
+      emit(
+        HomeLoaded(
+          expenses: _expenses,
+          filteredExpenses: _expenses,
+          totalSpent: _totalSpent,
+          searchQuery: '',
+        ),
+      );
+      return;
+    }
+
+    final List<Expense> filtered = _expenses
+        .where(
+          (expense) =>
+              (expense.description?.toLowerCase() ?? '').contains(searchQuery),
+        )
+        .toList();
+
+    emit(
+      HomeLoaded(
+        expenses: _expenses,
+        filteredExpenses: filtered,
+        totalSpent: _totalSpent,
+        searchQuery: query,
+      ),
+    );
   }
 }

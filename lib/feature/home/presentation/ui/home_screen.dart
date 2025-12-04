@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/core/di/di_service.dart';
+import 'package:expense_tracker_app/core/extensions/size_extension.dart';
 import 'package:expense_tracker_app/core/helpers/app_colors.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_state.dart';
@@ -15,17 +16,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final HomeCubit _cubit;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _cubit = getIt<HomeCubit>()..loadExpenses();
-  }
-
-  @override
-  void dispose() {
-    _cubit.close();
-    super.dispose();
   }
 
   @override
@@ -72,6 +68,41 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: (value) => _cubit.searchExpenses(value),
+                            decoration: InputDecoration(
+                              hintText: "Search expenses...",
+                              prefixIcon: Icon(Icons.search),
+                              suffixIcon: InkWell(
+                                child: Icon(Icons.cancel_outlined),
+                                onTap: () {
+                                  _searchController.clear();
+                                  _cubit.loadExpenses();
+                                },
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                        16.hSpace,
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: Icon(Icons.filter_alt),
+                        ),
+                      ],
+                    ),
+                  ),
                   Expanded(child: _buildExpenseList(state)),
                 ],
               ),
@@ -88,11 +119,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return Center(child: Text("Add a new expense to get started"));
     }
 
+    if (state.filteredExpenses.isEmpty) {
+      return Center(child: Text("No expenses found"));
+    }
+
     return ListView.builder(
       padding: EdgeInsets.symmetric(vertical: 8),
-      itemCount: state.expenses.length,
+      itemCount: state.filteredExpenses.length,
       itemBuilder: (context, index) {
-        return ExpenseListItem(expense: state.expenses[index]);
+        return ExpenseListItem(expense: state.filteredExpenses[index]);
       },
     );
   }
