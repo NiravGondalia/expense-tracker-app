@@ -8,6 +8,7 @@ import 'package:expense_tracker_app/feature/home/presentation/cubit/home_cubit.d
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_state.dart';
 import 'package:expense_tracker_app/feature/home/presentation/widget/expense_list_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -40,8 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: Text(state.message));
           }
           if (state is HomeLoaded) {
-            return Scaffold(
-              body: Column(
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle.light,
+              child: Scaffold(
+                body: Column(
                 children: [
                   Container(
                     width: double.infinity,
@@ -125,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     getIt<NavigationService>().pushNamed(AppRoutes.addExpense),
                 child: Icon(Icons.add),
               ),
+              ),
             );
           }
           return Center(child: Text("Something went wrong"));
@@ -140,51 +144,53 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Filter by Category",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  if (state.selectedCategory != null)
-                    TextButton(
-                      onPressed: () {
-                        _cubit.filterByCategory(null);
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Filter by Category",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    if (state.selectedCategory != null)
+                      TextButton(
+                        onPressed: () {
+                          _cubit.filterByCategory(null);
+                          Navigator.pop(context);
+                        },
+                        child: Text("Clear"),
+                      ),
+                  ],
+                ),
+                16.vSpace,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: state.categories.map((category) {
+                    final isSelected = state.selectedCategory == category.name;
+                    return ChoiceChip(
+                      label: Text(category.name),
+                      selected: isSelected,
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                      ),
+                      onSelected: (_) {
+                        _cubit.filterByCategory(category.name);
                         Navigator.pop(context);
                       },
-                      child: Text("Clear"),
-                    ),
-                ],
-              ),
-              16.vSpace,
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: state.categories.map((category) {
-                  final isSelected = state.selectedCategory == category.name;
-                  return ChoiceChip(
-                    label: Text(category.name),
-                    selected: isSelected,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                    ),
-                    onSelected: (_) {
-                      _cubit.filterByCategory(category.name);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              16.vSpace,
-            ],
+                    );
+                  }).toList(),
+                ),
+                16.vSpace,
+              ],
+            ),
           ),
         );
       },

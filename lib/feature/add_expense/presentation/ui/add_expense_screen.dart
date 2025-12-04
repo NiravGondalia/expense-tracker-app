@@ -6,6 +6,7 @@ import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_e
 import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/widget/category_chip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -86,6 +87,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         TextField(
                           controller: _amountController,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            _MaxValueInputFormatter(99999),
+                          ],
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
@@ -217,5 +222,26 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         },
       ),
     );
+  }
+}
+
+class _MaxValueInputFormatter extends TextInputFormatter {
+  final int maxValue;
+
+  _MaxValueInputFormatter(this.maxValue);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+    final intValue = int.tryParse(newValue.text);
+    if (intValue == null || intValue > maxValue) {
+      return oldValue;
+    }
+    return newValue;
   }
 }
