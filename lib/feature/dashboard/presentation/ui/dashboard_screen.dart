@@ -1,30 +1,66 @@
-import 'package:expense_tracker_app/core/helpers/app_colors.dart';
+import 'package:expense_tracker_app/feature/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/ui/home_screen.dart';
-import 'package:expense_tracker_app/feature/home/presentation/widget/expense_list_item.dart';
+import 'package:expense_tracker_app/feature/stats/presentation/ui/stats_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        children: [
-          HomeScreen(),
-          HomeScreen(),
-          HomeScreen(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (value) {
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
 
+class _DashboardScreenState extends State<DashboardScreen> {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => DashboardCubit(),
+      child: BlocBuilder<DashboardCubit, int>(
+        builder: (context, currentIndex) {
+          return Scaffold(
+            body: PageView(
+              controller: _pageController,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                HomeScreen(),
+                SizedBox(),
+                StatsScreen(),
+              ],
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: currentIndex,
+              onTap: (index) {
+                _pageController.animateToPage(
+                  index,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.add), label: "New Expense"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.pie_chart), label: "Stats"),
+              ],
+            ),
+          );
         },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: "New Expense"),
-          BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: "Stats"),
-        ],
       ),
     );
   }
