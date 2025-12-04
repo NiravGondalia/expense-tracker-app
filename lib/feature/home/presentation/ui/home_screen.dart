@@ -1,6 +1,8 @@
 import 'package:expense_tracker_app/core/di/di_service.dart';
 import 'package:expense_tracker_app/core/extensions/size_extension.dart';
 import 'package:expense_tracker_app/core/helpers/app_colors.dart';
+import 'package:expense_tracker_app/core/navigation/app_routes.dart';
+import 'package:expense_tracker_app/core/navigation/navigation_service.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_state.dart';
 import 'package:expense_tracker_app/feature/home/presentation/widget/expense_list_item.dart';
@@ -97,7 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         16.hSpace,
                         ElevatedButton(
-                          onPressed: () => _showFilterBottomSheet(context, state),
+                          onPressed: () =>
+                              _showFilterBottomSheet(context, state),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: state.selectedCategory != null
                                 ? AppColors.primary
@@ -115,6 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Expanded(child: _buildExpenseList(state)),
                 ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () =>
+                    getIt<NavigationService>().pushNamed(AppRoutes.addExpense),
+                child: Icon(Icons.add),
               ),
             );
           }
