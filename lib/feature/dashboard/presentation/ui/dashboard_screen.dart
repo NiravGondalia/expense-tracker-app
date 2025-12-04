@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/core/di/di_service.dart';
 import 'package:expense_tracker_app/feature/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/ui/home_screen.dart';
 import 'package:expense_tracker_app/feature/stats/presentation/ui/stats_screen.dart';
@@ -28,35 +29,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => DashboardCubit(),
+    return BlocProvider<DashboardCubit>(
+      create: (context) => getIt<DashboardCubit>(),
       child: BlocBuilder<DashboardCubit, int>(
         builder: (context, currentIndex) {
           return Scaffold(
             body: PageView(
               controller: _pageController,
               physics: NeverScrollableScrollPhysics(),
-              children: [
-                HomeScreen(),
-                SizedBox(),
-                StatsScreen(),
-              ],
+              children: [HomeScreen(), SizedBox(), StatsScreen()],
             ),
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: currentIndex,
               onTap: (index) {
-                _pageController.animateToPage(
-                  index,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
+                getIt<DashboardCubit>().checkAndChangePage(index, () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                });
               },
               items: [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.add), label: "New Expense"),
+                  icon: Icon(Icons.add),
+                  label: "New Expense",
+                ),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.pie_chart), label: "Stats"),
+                  icon: Icon(Icons.pie_chart),
+                  label: "Stats",
+                ),
               ],
             ),
           );
