@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/feature/dashboard/presentation/ui/dashboard_screen.dart';
 import 'package:expense_tracker_app/feature/home/presentation/ui/home_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: HomeScreen(),
+      home: DashboardScreen(),
     );
   }
 }

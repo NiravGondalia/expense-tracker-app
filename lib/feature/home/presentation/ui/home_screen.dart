@@ -46,13 +46,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: "New Expense"),
-          BottomNavigationBarItem(icon: Icon(Icons.pie_chart), label: "Stats"),
-        ],
-      ),
     );
   }
 }
