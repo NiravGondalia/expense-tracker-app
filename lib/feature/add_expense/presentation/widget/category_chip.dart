@@ -6,12 +6,14 @@ class CategoryChip extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isSelected;
+  final VoidCallback? onTap;
 
   const CategoryChip({
     super.key,
     required this.label,
     required this.icon,
     required this.isSelected,
+    this.onTap,
   });
 
   @override
@@ -32,7 +34,7 @@ class CategoryChip extends StatelessWidget {
       selected: isSelected,
       selectedColor: AppColors.primary,
       labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
-      onSelected: (selected) {},
+      onSelected: (selected) => onTap?.call(),
     );
   }
 }
