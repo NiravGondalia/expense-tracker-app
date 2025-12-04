@@ -1,6 +1,7 @@
 import 'package:expense_tracker_app/core/di/di_service.dart';
 import 'package:expense_tracker_app/core/extensions/size_extension.dart';
 import 'package:expense_tracker_app/core/helpers/app_colors.dart';
+import 'package:expense_tracker_app/core/helpers/date_time_helper.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/widget/category_chip.dart';
@@ -17,6 +18,7 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  late final AddExpenseCubit _cubit;
 
   final Map<String, IconData> _iconMap = {
     'restaurant': Icons.restaurant,
@@ -28,16 +30,30 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _cubit = getIt<AddExpenseCubit>()..loadCategories();
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final picked = await DateTimeHelper.showDatePickerDialog(context);
+    if (picked != null) {
+      _cubit.selectDate(picked);
+    }
+  }
+
+  @override
   void dispose() {
     _amountController.dispose();
     _descriptionController.dispose();
+    _cubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<AddExpenseCubit>()..loadCategories(),
+    return BlocProvider.value(
+      value: _cubit,
       child: BlocConsumer<AddExpenseCubit, AddExpenseState>(
         listener: (context, state) {
           if (state is AddExpenseSuccess) {
@@ -57,14 +73,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         Text(
                           "Amount",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         8.vSpace,
                         TextField(
                           controller: _amountController,
                           keyboardType: TextInputType.number,
                           style: TextStyle(
-                              fontSize: 32, fontWeight: FontWeight.bold),
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
                           decoration: InputDecoration(
                             prefixText: "₹ ",
                             prefixStyle: TextStyle(
@@ -81,7 +101,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         Text(
                           "Category",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         8.vSpace,
                         if (state is AddExpenseLoaded)
@@ -94,8 +116,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 icon: _iconMap[category.icon] ?? Icons.category,
                                 isSelected:
                                     state.selectedCategory == category.name,
-                                onTap: () => getIt<AddExpenseCubit>()
-                                    .selectCategory(category.name),
+                                onTap: () => _cubit.selectCategory(category.name),
                               );
                             }).toList(),
                           ),
@@ -103,33 +124,49 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         Text(
                           "Date",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         8.vSpace,
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(12),
+                        if (state is AddExpenseLoaded)
+                          GestureDetector(
+                            onTap: () => _pickDate(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    color: AppColors.primary,
+                                  ),
+                                  12.hSpace,
+                                  Text(
+                                    DateTimeHelper.formatDate(
+                                      state.selectedDate,
+                                    ),
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  Spacer(),
+                                  Icon(Icons.arrow_drop_down),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.calendar_today,
-                                  color: AppColors.primary),
-                              12.hSpace,
-                              Text("Today, Dec 4, 2024",
-                                  style: TextStyle(fontSize: 16)),
-                              Spacer(),
-                              Icon(Icons.arrow_drop_down),
-                            ],
-                          ),
-                        ),
                         24.vSpace,
                         Text(
                           "Description",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         8.vSpace,
                         TextField(
@@ -148,12 +185,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           height: 56,
                           child: ElevatedButton(
                             onPressed: () {
-                              getIt<AddExpenseCubit>().saveExpense(
-                                    amountText: _amountController.text,
-                                    date: DateTime.now(),
-                                    descriptionText:
-                                        _descriptionController.text,
-                                  );
+                              _cubit.saveExpense(
+                                amountText: _amountController.text,
+                                descriptionText: _descriptionController.text,
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -163,8 +198,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             ),
                             child: Text(
                               "Save Expense",
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),

@@ -9,14 +9,17 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
 
   List<Category> _categories = [];
   String _selectedCategory = '';
+  DateTime _selectedDate = DateTime.now();
 
   Future<void> loadCategories() async {
     emit(AddExpenseLoading());
     _categories = await DatabaseHelper.instance.getAllCategories();
     _selectedCategory = _categories.isNotEmpty ? _categories.first.name : '';
+    _selectedDate = DateTime.now();
     emit(AddExpenseLoaded(
       categories: _categories,
       selectedCategory: _selectedCategory,
+      selectedDate: _selectedDate,
     ));
   }
 
@@ -25,12 +28,21 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
     emit(AddExpenseLoaded(
       categories: _categories,
       selectedCategory: _selectedCategory,
+      selectedDate: _selectedDate,
+    ));
+  }
+
+  void selectDate(DateTime date) {
+    _selectedDate = date;
+    emit(AddExpenseLoaded(
+      categories: _categories,
+      selectedCategory: _selectedCategory,
+      selectedDate: _selectedDate,
     ));
   }
 
   Future<void> saveExpense({
     required String amountText,
-    required DateTime date,
     required String descriptionText,
   }) async {
     final amount = double.tryParse(amountText) ?? 0;
@@ -42,7 +54,7 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
       final expense = Expense(
         amount: amount,
         category: _selectedCategory,
-        date: date,
+        date: _selectedDate,
         description: descriptionText.isEmpty ? null : descriptionText,
       );
 
