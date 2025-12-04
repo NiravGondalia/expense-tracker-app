@@ -1,7 +1,6 @@
 import 'package:expense_tracker_app/core/di/di_service.dart';
 import 'package:expense_tracker_app/feature/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/ui/home_screen.dart';
-import 'package:expense_tracker_app/feature/stats/presentation/ui/stats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,10 +36,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             body: PageView(
               controller: _pageController,
               physics: NeverScrollableScrollPhysics(),
-              children: [HomeScreen(), SizedBox(), StatsScreen()],
+              children: [HomeScreen(), SizedBox()],
             ),
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: currentIndex,
+              elevation: 10,
               onTap: (index) {
                 getIt<DashboardCubit>().checkAndChangePage(index, () {
                   _pageController.animateToPage(
@@ -55,10 +55,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
                   label: "New Expense",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.pie_chart),
-                  label: "Stats",
                 ),
               ],
             ),
