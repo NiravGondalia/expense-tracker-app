@@ -1,11 +1,28 @@
-import 'package:expense_tracker_app/core/database/database_helper.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/model/category.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/calculate_total_spent_usecase.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/filter_expenses_usecase.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/get_categories_usecase.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/get_expenses_usecase.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit() : super(HomeLoading());
+  final GetExpensesUseCase _getExpensesUseCase;
+  final GetCategoriesUseCase _getCategoriesUseCase;
+  final FilterExpensesUseCase _filterExpensesUseCase;
+  final CalculateTotalSpentUseCase _calculateTotalSpentUseCase;
+
+  HomeCubit({
+    required GetExpensesUseCase getExpensesUseCase,
+    required GetCategoriesUseCase getCategoriesUseCase,
+    required FilterExpensesUseCase filterExpensesUseCase,
+    required CalculateTotalSpentUseCase calculateTotalSpentUseCase,
+  })  : _getExpensesUseCase = getExpensesUseCase,
+        _getCategoriesUseCase = getCategoriesUseCase,
+        _filterExpensesUseCase = filterExpensesUseCase,
+        _calculateTotalSpentUseCase = calculateTotalSpentUseCase,
+        super(HomeLoading());
 
   List<Expense> _expenses = [];
   List<Category> _categories = [];
@@ -17,53 +34,38 @@ class HomeCubit extends Cubit<HomeState> {
     emit(HomeLoading());
 
     try {
-      _expenses = await DatabaseHelper.instance.getAllExpenses();
-      _categories = await DatabaseHelper.instance.getAllCategories();
-      _totalSpent = _expenses.fold<double>(
-        0,
-        (sum, expense) => sum + expense.amount,
-      );
+      _expenses = await _getExpensesUseCase();
+      _categories = await _getCategoriesUseCase();
+      _totalSpent = _calculateTotalSpentUseCase(_expenses);
       _searchQuery = '';
 
-      searchExpenses(_searchQuery);
+      _emitLoadedState();
     } catch (e) {
       emit(HomeError(e.toString()));
     }
   }
 
   void searchExpenses(String query) {
-    _searchQuery = query.toLowerCase().trim();
-    _applyFilters();
+    _searchQuery = query;
+    _emitLoadedState();
   }
 
   void filterByCategory(String? category) {
     _selectedCategory = category;
-    _applyFilters();
+    _emitLoadedState();
   }
 
-  void _applyFilters() {
-    List<Expense> filtered = _expenses;
-
-    if (_selectedCategory != null) {
-      filtered = filtered
-          .where((expense) => expense.category == _selectedCategory)
-          .toList();
-    }
-
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where(
-            (expense) =>
-                (expense.description?.toLowerCase() ?? '')
-                    .contains(_searchQuery),
-          )
-          .toList();
-    }
+  void _emitLoadedState() {
+    final List<Expense> filteredExpenses = _filterExpensesUseCase(
+      expenses: _expenses,
+      category: _selectedCategory,
+      searchQuery: _searchQuery,
+    );
 
     emit(
       HomeLoaded(
         expenses: _expenses,
-        filteredExpenses: filtered,
+        filteredExpenses: filteredExpenses,
         categories: _categories,
         totalSpent: _totalSpent,
         searchQuery: _searchQuery,
