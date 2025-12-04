@@ -55,9 +55,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: BlocConsumer<AddExpenseCubit, AddExpenseState>(
+        buildWhen: (previous, current) => current is! AddExpenseError,
         listener: (context, state) {
           if (state is AddExpenseSuccess) {
             Navigator.pop(context);
+          } else if (state is AddExpenseError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
           }
         },
         builder: (context, state) {

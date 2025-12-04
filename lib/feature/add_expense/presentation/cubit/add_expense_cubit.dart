@@ -46,7 +46,16 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
     required String descriptionText,
   }) async {
     final amount = double.tryParse(amountText) ?? 0;
-    if (amount <= 0) return;
+
+    if (amount <= 0) {
+      emit(AddExpenseError('Please enter a valid amount'));
+      return;
+    }
+
+    if (descriptionText.trim().isEmpty) {
+      emit(AddExpenseError('Please enter a description'));
+      return;
+    }
 
     emit(AddExpenseLoading());
 
@@ -55,7 +64,7 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
         amount: amount,
         category: _selectedCategory,
         date: _selectedDate,
-        description: descriptionText.isEmpty ? null : descriptionText,
+        description: descriptionText.trim(),
       );
 
       await DatabaseHelper.instance.insertExpense(expense);
