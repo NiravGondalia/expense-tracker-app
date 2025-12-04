@@ -97,8 +97,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         16.hSpace,
                         ElevatedButton(
-                          onPressed: () {},
-                          child: Icon(Icons.filter_alt),
+                          onPressed: () => _showFilterBottomSheet(context, state),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: state.selectedCategory != null
+                                ? AppColors.primary
+                                : null,
+                          ),
+                          child: Icon(
+                            Icons.filter_alt,
+                            color: state.selectedCategory != null
+                                ? Colors.white
+                                : null,
+                          ),
                         ),
                       ],
                     ),
@@ -111,6 +121,64 @@ class _HomeScreenState extends State<HomeScreen> {
           return Center(child: Text("Something went wrong"));
         },
       ),
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context, HomeLoaded state) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Filter by Category",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  if (state.selectedCategory != null)
+                    TextButton(
+                      onPressed: () {
+                        _cubit.filterByCategory(null);
+                        Navigator.pop(context);
+                      },
+                      child: Text("Clear"),
+                    ),
+                ],
+              ),
+              16.vSpace,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: state.categories.map((category) {
+                  final isSelected = state.selectedCategory == category.name;
+                  return ChoiceChip(
+                    label: Text(category.name),
+                    selected: isSelected,
+                    selectedColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black,
+                    ),
+                    onSelected: (_) {
+                      _cubit.filterByCategory(category.name);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ),
+              16.vSpace,
+            ],
+          ),
+        );
+      },
     );
   }
 
