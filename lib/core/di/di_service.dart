@@ -6,7 +6,6 @@ import 'package:expense_tracker_app/feature/add_expense/domain/repository/add_ex
 import 'package:expense_tracker_app/feature/add_expense/domain/usecase/get_categories_usecase.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/usecase/save_expense_usecase.dart';
 import 'package:expense_tracker_app/feature/add_expense/presentation/cubit/add_expense_cubit.dart';
-import 'package:expense_tracker_app/feature/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:expense_tracker_app/feature/home/data/datasource/home_local_data_source.dart';
 import 'package:expense_tracker_app/feature/home/data/repository/home_repository_impl.dart';
 import 'package:expense_tracker_app/feature/home/domain/repository/home_repository.dart';
@@ -56,6 +55,4 @@ void initDependencies() {
       saveExpenseUseCase: getIt<SaveExpenseUseCase>(),
     ),
   );
-
-  getIt.registerLazySingleton(() => DashboardCubit());
 }
