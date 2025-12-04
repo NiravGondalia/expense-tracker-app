@@ -10,6 +10,7 @@ import 'package:expense_tracker_app/feature/home/data/datasource/home_local_data
 import 'package:expense_tracker_app/feature/home/data/repository/home_repository_impl.dart';
 import 'package:expense_tracker_app/feature/home/domain/repository/home_repository.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/calculate_total_spent_usecase.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/delete_expense_usecase.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/filter_expenses_usecase.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/get_categories_usecase.dart' as home;
 import 'package:expense_tracker_app/feature/home/domain/usecase/get_expenses_usecase.dart';
@@ -32,12 +33,14 @@ void initDependencies() {
   getIt.registerFactory(() => home.GetCategoriesUseCase(getIt<HomeRepository>()));
   getIt.registerFactory(() => FilterExpensesUseCase());
   getIt.registerFactory(() => CalculateTotalSpentUseCase());
+  getIt.registerFactory(() => DeleteExpenseUseCase(getIt<HomeRepository>()));
   getIt.registerLazySingleton(
     () => HomeCubit(
       getExpensesUseCase: getIt<GetExpensesUseCase>(),
       getCategoriesUseCase: getIt<home.GetCategoriesUseCase>(),
       filterExpensesUseCase: getIt<FilterExpensesUseCase>(),
       calculateTotalSpentUseCase: getIt<CalculateTotalSpentUseCase>(),
+      deleteExpenseUseCase: getIt<DeleteExpenseUseCase>(),
     ),
   );
 

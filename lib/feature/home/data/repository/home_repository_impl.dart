@@ -17,5 +17,10 @@ class HomeRepositoryImpl implements HomeRepository {
   Future<List<Category>> getCategories() async {
     return await _localDataSource.getCategories();
   }
+
+  @override
+  Future<int> deleteExpense(int id) async {
+    return await _localDataSource.deleteExpense(id);
+  }
 }
 

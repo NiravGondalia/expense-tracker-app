@@ -93,4 +93,9 @@ class DatabaseHelper {
     final result = await db.query('categories');
     return result.map((map) => Category.fromMap(map)).toList();
   }
+
+  Future<int> deleteExpense(int id) async {
+    final db = await database;
+    return await db.delete('expenses', where: 'id = ?', whereArgs: [id]);
+  }
 }

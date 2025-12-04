@@ -3,6 +3,7 @@ import 'package:expense_tracker_app/core/extensions/size_extension.dart';
 import 'package:expense_tracker_app/core/helpers/app_colors.dart';
 import 'package:expense_tracker_app/core/navigation/app_routes.dart';
 import 'package:expense_tracker_app/core/navigation/navigation_service.dart';
+import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_cubit.dart';
 import 'package:expense_tracker_app/feature/home/presentation/cubit/home_state.dart';
 import 'package:expense_tracker_app/feature/home/presentation/widget/expense_list_item.dart';
@@ -203,8 +204,36 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: EdgeInsets.symmetric(vertical: 8),
       itemCount: state.filteredExpenses.length,
       itemBuilder: (context, index) {
-        return ExpenseListItem(expense: state.filteredExpenses[index]);
+        final Expense expense = state.filteredExpenses[index];
+        return ExpenseListItem(
+          expense: expense,
+          onLongPress: () => _showDeleteDialog(context, expense),
+        );
       },
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, expense) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Delete Expense"),
+        content: Text("Are you sure you want to delete this expense?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              _cubit.deleteExpense(expense.id!);
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text("Delete"),
+          ),
+        ],
+      ),
     );
   }
 }

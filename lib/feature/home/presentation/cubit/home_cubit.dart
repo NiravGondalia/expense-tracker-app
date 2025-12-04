@@ -1,6 +1,7 @@
 import 'package:expense_tracker_app/feature/add_expense/domain/model/category.dart';
 import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/calculate_total_spent_usecase.dart';
+import 'package:expense_tracker_app/feature/home/domain/usecase/delete_expense_usecase.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/filter_expenses_usecase.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/get_categories_usecase.dart';
 import 'package:expense_tracker_app/feature/home/domain/usecase/get_expenses_usecase.dart';
@@ -12,16 +13,19 @@ class HomeCubit extends Cubit<HomeState> {
   final GetCategoriesUseCase _getCategoriesUseCase;
   final FilterExpensesUseCase _filterExpensesUseCase;
   final CalculateTotalSpentUseCase _calculateTotalSpentUseCase;
+  final DeleteExpenseUseCase _deleteExpenseUseCase;
 
   HomeCubit({
     required GetExpensesUseCase getExpensesUseCase,
     required GetCategoriesUseCase getCategoriesUseCase,
     required FilterExpensesUseCase filterExpensesUseCase,
     required CalculateTotalSpentUseCase calculateTotalSpentUseCase,
+    required DeleteExpenseUseCase deleteExpenseUseCase,
   })  : _getExpensesUseCase = getExpensesUseCase,
         _getCategoriesUseCase = getCategoriesUseCase,
         _filterExpensesUseCase = filterExpensesUseCase,
         _calculateTotalSpentUseCase = calculateTotalSpentUseCase,
+        _deleteExpenseUseCase = deleteExpenseUseCase,
         super(HomeLoading());
 
   List<Expense> _expenses = [];
@@ -53,6 +57,17 @@ class HomeCubit extends Cubit<HomeState> {
   void filterByCategory(String? category) {
     _selectedCategory = category;
     _emitLoadedState();
+  }
+
+  Future<void> deleteExpense(int id) async {
+    try {
+      await _deleteExpenseUseCase(id);
+      _expenses.removeWhere((expense) => expense.id == id);
+      _totalSpent = _calculateTotalSpentUseCase(_expenses);
+      _emitLoadedState();
+    } catch (e) {
+      emit(HomeError(e.toString()));
+    }
   }
 
   void _emitLoadedState() {

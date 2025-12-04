@@ -5,6 +5,7 @@ import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dar
 abstract class HomeLocalDataSource {
   Future<List<Expense>> getExpenses();
   Future<List<Category>> getCategories();
+  Future<int> deleteExpense(int id);
 }
 
 class HomeLocalDataSourceImpl implements HomeLocalDataSource {
@@ -20,6 +21,11 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
   @override
   Future<List<Category>> getCategories() async {
     return await _databaseHelper.getAllCategories();
+  }
+
+  @override
+  Future<int> deleteExpense(int id) async {
+    return await _databaseHelper.deleteExpense(id);
   }
 }
 

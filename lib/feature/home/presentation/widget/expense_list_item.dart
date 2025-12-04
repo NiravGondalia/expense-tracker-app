@@ -6,60 +6,68 @@ import 'package:flutter/material.dart';
 
 class ExpenseListItem extends StatelessWidget {
   final Expense expense;
+  final VoidCallback onLongPress;
 
-  const ExpenseListItem({super.key, required this.expense});
+  const ExpenseListItem({
+    super.key,
+    required this.expense,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primary.withValues(alpha: 0.1),
+    return InkWell(
+      onLongPress:() => onLongPress(),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                _getCategoryIcon(expense.category),
+                color: AppColors.primary,
+              ),
             ),
-            child: Icon(
-              _getCategoryIcon(expense.category),
-              color: AppColors.primary,
+            16.hSpace,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    expense.description ?? "Expense",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    DateTimeHelper.formatDate(expense.date),
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-          16.hSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            16.hSpace,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  expense.description ?? "Expense",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  expense.category,
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 Text(
-                  DateTimeHelper.formatDate(expense.date),
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  "₹${expense.amount.toStringAsFixed(0)}",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
-          ),
-          16.hSpace,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                expense.category,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              Text(
-                "₹${expense.amount.toStringAsFixed(0)}",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

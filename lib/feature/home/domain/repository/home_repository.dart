@@ -4,5 +4,6 @@ import 'package:expense_tracker_app/feature/add_expense/domain/model/expense.dar
 abstract class HomeRepository {
   Future<List<Expense>> getExpenses();
   Future<List<Category>> getCategories();
+  Future<int> deleteExpense(int id);
 }
 
